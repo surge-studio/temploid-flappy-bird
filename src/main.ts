@@ -1,6 +1,7 @@
 import 'modern-normalize';
 import './style.css';
-import { Application, Sprite, Text, Texture } from 'pixi.js';
+import './fonts';
+import { AnimatedSprite, Application, Text, Texture } from 'pixi.js';
 import { BIRD, GAME } from './consts';
 
 declare global {
@@ -9,15 +10,6 @@ declare global {
   }
 }
 
-// Application
-const app = new Application<HTMLCanvasElement>({
-  resizeTo: window,
-  backgroundColor: '#75A7F9',
-});
-
-document.body.appendChild(app.view);
-
-// Fonts
 window.WebFontConfig = {
   google: {
     families: ['Pixelify Sans'],
@@ -27,20 +19,23 @@ window.WebFontConfig = {
   },
 };
 
-(function () {
-  const wf = document.createElement('script');
-  wf.src = `${
-    document.location.protocol === 'https:' ? 'https' : 'http'
-  }://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js`;
-  wf.type = 'text/javascript';
-  wf.async = true;
-  const s = document.getElementsByTagName('script')[0];
-  s.parentNode?.insertBefore(wf, s);
-})();
+// Application
+const app = new Application<HTMLCanvasElement>({
+  resizeTo: window,
+  backgroundColor: '#75A7F9',
+});
+
+document.body.appendChild(app.view);
 
 // Assets
-const birdTexture = Texture.from('./sprites/bird01.png');
-let bird = Sprite.from(birdTexture);
+const images = [
+  './sprites/bird01.png',
+  './sprites/bird02.png',
+  './sprites/bird03.png',
+  './sprites/bird04.png',
+];
+const textures = images.map((image) => Texture.from(image));
+let bird = new AnimatedSprite(textures);
 let velocity = 0;
 let time = 0;
 let timeText: Text;
@@ -51,8 +46,10 @@ const setup = () => {
   bird.width = BIRD.size;
   bird.height = BIRD.size;
   bird.anchor.set(0.5);
+  bird.animationSpeed = 0.1;
   bird.x = app.screen.width / 3;
   bird.y = app.screen.height / 2;
+  bird.play();
 
   // Score
   timeText = new Text(`${time}s`, {
@@ -91,8 +88,9 @@ const gameLoop = (delta: number) => {
   velocity -= (GAME.gravity / app.ticker.FPS) * delta;
   bird.y -= velocity;
 
-  // velocity based rotation
+  // velocity based animation
   bird.rotation = Math.atan(-velocity / 10);
+  bird.animationSpeed = Math.max(0.1, Math.min(0.5, velocity * 0.5 + 0.1));
 
   // events
   if (bird.y > app.screen.height || bird.y < 0) {
