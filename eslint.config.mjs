@@ -1,3 +1,8 @@
 import harmony from 'eslint-config-harmony';
 
-export default harmony;
+const config = {
+  ...harmony,
+  'import/namespace': 'off',
+};
+
+export default config;
