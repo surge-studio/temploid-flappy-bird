@@ -9,7 +9,13 @@ import {
   TilingSprite,
 } from 'pixi.js';
 import { MotionBlurFilter } from '@pixi/filter-motion-blur';
-import { BIRD, GAME } from './consts';
+import {
+  BIRD_FLAP_MAX_SPEED,
+  BIRD_FLAP_SPEED,
+  BIRD_SIZE,
+  GAME_SPEED,
+  GRAVITY,
+} from './consts';
 
 declare global {
   interface Window {
@@ -70,8 +76,8 @@ const setup = () => {
   // Bird
   const birdTextures = images.map((image) => Texture.from(image));
   bird = new AnimatedSprite(birdTextures);
-  bird.width = BIRD.size;
-  bird.height = BIRD.size;
+  bird.width = BIRD_SIZE;
+  bird.height = BIRD_SIZE;
   bird.anchor.set(0.5);
   bird.animationSpeed = 0.1;
   bird.x = app.screen.width / 3;
@@ -122,7 +128,7 @@ const gameLoop = (delta: number) => {
   if (!bird) return;
 
   // apply gravity and velocity
-  velocity -= (GAME.gravity / app.ticker.FPS) * delta;
+  velocity -= (GRAVITY / app.ticker.FPS) * delta;
   bird.y -= velocity;
 
   // velocity based animation
@@ -141,16 +147,16 @@ const gameLoop = (delta: number) => {
   timeText.text = `${Math.floor(time / 60)}s`;
 
   // background
-  background.tilePosition.x -= delta * (GAME.speed / 12);
-  ground.tilePosition.x -= delta * GAME.speed;
+  background.tilePosition.x -= delta * (GAME_SPEED / 12);
+  ground.tilePosition.x -= delta * GAME_SPEED;
 };
 
 // Events
 const flap = () => {
-  velocity += BIRD.flapSpeed;
+  velocity += BIRD_FLAP_SPEED;
 
-  if (velocity > BIRD.flapMaxSpeed) {
-    velocity = BIRD.flapMaxSpeed;
+  if (velocity > BIRD_FLAP_MAX_SPEED) {
+    velocity = BIRD_FLAP_MAX_SPEED;
   }
 };
 
