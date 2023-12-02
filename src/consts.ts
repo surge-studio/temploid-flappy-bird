@@ -1,7 +1,7 @@
 export const BIRD = {
   size: 64,
-  flapSpeed: 10,
-  flapMaxSpeed: 20,
+  flapSpeed: 9.8,
+  flapMaxSpeed: 9.8 * 1.5,
 };
 
 export const GAME = {

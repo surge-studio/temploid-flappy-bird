@@ -1,7 +1,14 @@
 import 'modern-normalize';
 import './style.css';
 import './fonts';
-import { AnimatedSprite, Application, Text, Texture } from 'pixi.js';
+import {
+  AnimatedSprite,
+  Application,
+  Text,
+  Texture,
+  TilingSprite,
+} from 'pixi.js';
+import { MotionBlurFilter } from '@pixi/filter-motion-blur';
 import { BIRD, GAME } from './consts';
 
 declare global {
@@ -12,7 +19,7 @@ declare global {
 
 window.WebFontConfig = {
   google: {
-    families: ['Pixelify Sans'],
+    families: ['Press Start 2P'],
   },
   active() {
     setup();
@@ -34,15 +41,29 @@ const images = [
   './sprites/bird03.png',
   './sprites/bird04.png',
 ];
-const textures = images.map((image) => Texture.from(image));
-let bird = new AnimatedSprite(textures);
+
+let bird: AnimatedSprite;
+let background: TilingSprite;
 let velocity = 0;
 let time = 0;
 let timeText: Text;
 
 // Setup
 const setup = () => {
+  // Background
+  const backgroundTexture = Texture.from('./sprites/background.png');
+  background = new TilingSprite(
+    backgroundTexture,
+    app.screen.width,
+    app.screen.height
+  );
+  background.tileScale.x = app.screen.width / 800;
+  background.tileScale.y = app.screen.height / 480;
+  background.alpha = 0.5;
+
   // Bird
+  const birdTextures = images.map((image) => Texture.from(image));
+  bird = new AnimatedSprite(birdTextures);
   bird.width = BIRD.size;
   bird.height = BIRD.size;
   bird.anchor.set(0.5);
@@ -53,14 +74,23 @@ const setup = () => {
 
   // Score
   timeText = new Text(`${time}s`, {
-    fontFamily: 'Pixelify Sans, sans-serif',
-    fontSize: 32,
-    fill: 'white',
+    fontFamily: 'Press Start 2P, sans-serif',
+    fontSize: 48,
+    fill: 'rgba(255, 255, 255, 0.6)',
     align: 'left',
+    dropShadow: true,
+    dropShadowBlur: 0,
+    dropShadowColor: '#000000',
+    dropShadowDistance: 4,
+    dropShadowAlpha: 0.1,
+    dropShadowAngle: Math.PI / 2,
   });
-  timeText.position.set(32, 32);
+  timeText.anchor.set(0.5);
+  timeText.position.set(app.screen.width / 2, app.screen.height / 2);
+  timeText.skew.set(0.2, 0);
 
   // Add
+  app.stage.addChild(background);
   app.stage.addChild(bird);
   app.stage.addChild(timeText);
 
@@ -91,6 +121,8 @@ const gameLoop = (delta: number) => {
   // velocity based animation
   bird.rotation = Math.atan(-velocity / 10);
   bird.animationSpeed = Math.max(0.1, Math.min(0.5, velocity * 0.5 + 0.1));
+  let motionBlurFilter = new MotionBlurFilter([0, velocity], 32);
+  bird.filters = [motionBlurFilter];
 
   // events
   if (bird.y > app.screen.height || bird.y < 0) {
@@ -100,11 +132,18 @@ const gameLoop = (delta: number) => {
   // score
   time += delta;
   timeText.text = `${Math.floor(time / 60)}s`;
+
+  // background
+  background.tilePosition.x -= (delta * GAME.speed) / 8;
 };
 
 // Events
 const flap = () => {
   velocity += BIRD.flapSpeed;
+
+  if (velocity > BIRD.flapMaxSpeed) {
+    velocity = BIRD.flapMaxSpeed;
+  }
 };
 
 const handleKeydown = (event: KeyboardEvent) => {

@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@pixi/filter-motion-blur':
+    specifier: ^5.1.1
+    version: 5.1.1(@pixi/core@7.3.2)
   modern-normalize:
     specifier: ^2.0.0
     version: 2.0.0
@@ -1104,6 +1107,14 @@ packages:
     resolution: {integrity: sha512-9brtlxDnQTZk2XiFBKdBK9e+8CX9LdxxcL7LRpjEyiHuAPvTlQgu9B85LrJ4GzWKqJJKaIIZBzhIoiCLUnfeXg==}
     peerDependencies:
       '@pixi/core': 7.3.2
+    dependencies:
+      '@pixi/core': 7.3.2
+    dev: false
+
+  /@pixi/filter-motion-blur@5.1.1(@pixi/core@7.3.2):
+    resolution: {integrity: sha512-I94s3pW2GutjCyXiKQ/dI4Vl9JKne+Q8QgGRn1mrk0Uwg6DDO/OQI3jqv01S+SCTU3LZqhR/p8AQyxeDmOhr2w==}
+    peerDependencies:
+      '@pixi/core': ^7.0.0-X
     dependencies:
       '@pixi/core': 7.3.2
     dev: false
