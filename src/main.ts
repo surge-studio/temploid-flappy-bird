@@ -44,6 +44,7 @@ const images = [
 
 let bird: AnimatedSprite;
 let background: TilingSprite;
+let ground: TilingSprite;
 let velocity = 0;
 let time = 0;
 let timeText: Text;
@@ -60,6 +61,11 @@ const setup = () => {
   background.tileScale.x = app.screen.width / 800;
   background.tileScale.y = app.screen.height / 480;
   background.alpha = 0.5;
+
+  // Ground
+  const groundTexture = Texture.from('./sprites/ground.png');
+  ground = new TilingSprite(groundTexture, app.screen.width, 70);
+  ground.y = app.screen.height - 70;
 
   // Bird
   const birdTextures = images.map((image) => Texture.from(image));
@@ -91,6 +97,7 @@ const setup = () => {
 
   // Add
   app.stage.addChild(background);
+  app.stage.addChild(ground);
   app.stage.addChild(bird);
   app.stage.addChild(timeText);
 
@@ -134,7 +141,8 @@ const gameLoop = (delta: number) => {
   timeText.text = `${Math.floor(time / 60)}s`;
 
   // background
-  background.tilePosition.x -= (delta * GAME.speed) / 8;
+  background.tilePosition.x -= delta * (GAME.speed / 12);
+  ground.tilePosition.x -= delta * GAME.speed;
 };
 
 // Events

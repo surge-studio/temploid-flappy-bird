@@ -6,5 +6,5 @@ export const BIRD = {
 
 export const GAME = {
   gravity: 9.8,
-  speed: 40,
+  speed: 6,
 };
