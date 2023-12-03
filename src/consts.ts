@@ -4,8 +4,7 @@ export const BIRD_FLAP_SPEED = 9.8;
 export const BIRD_FLAP_MAX_SPEED = 9.8 * 1.5;
 
 // tube
-export const TUBE_DISTANCE = 300;
-export const TUBE_OPENING = 180;
+export const TUBE_OPENING = BIRD_SIZE * 4;
 export const TUBE_WIDTH = 18 * 2;
 
 // game

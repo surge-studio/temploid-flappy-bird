@@ -20,6 +20,7 @@ import {
   TUBE_OPENING,
   TUBE_WIDTH,
 } from './consts';
+import { collisionCheck } from './utils';
 
 declare global {
   interface Window {
@@ -114,7 +115,7 @@ const setup = () => {
   app.stage.addChild(ground);
   app.stage.addChild(bird);
   app.stage.addChild(score);
-  addTube();
+  addTubes();
 
   // Events
   document.addEventListener('keydown', handleKeydown);
@@ -124,7 +125,7 @@ const setup = () => {
   app.ticker.add(gameLoop);
 };
 
-const addTube = () => {
+const addTubes = () => {
   const tubeTexture = Texture.from('./sprites/tile.png');
   const x = app.screen.width + TUBE_WIDTH;
   const padding = 80;
@@ -143,7 +144,7 @@ const addTube = () => {
   const upperTube = new TilingSprite(
     tubeTexture,
     TUBE_WIDTH,
-    app.screen.height
+    Math.round(app.screen.height / TUBE_WIDTH) * TUBE_WIDTH
   );
   upperTube.x = x;
   upperTube.y = lowerTube.y - TUBE_OPENING - app.screen.height;
@@ -171,7 +172,7 @@ const reset = () => {
   });
   upperTubes = [];
   lowerTubes = [];
-  addTube();
+  addTubes();
 
   // Background
   background.tilePosition.x = 0;
@@ -184,7 +185,7 @@ const gameLoop = (delta: number) => {
 
   // apply gravity and velocity
   velocity -= (GRAVITY / app.ticker.FPS) * delta;
-  bird.y -= velocity;
+  bird.y -= Math.round(velocity);
 
   // velocity based animation
   bird.rotation = Math.atan(-velocity / 10);
@@ -202,48 +203,53 @@ const gameLoop = (delta: number) => {
     return;
   }
 
-  // check if bird collides with any upper tube
-  upperTubes.forEach((tube) => {
-    if (bird.x > tube.x && bird.x < tube.x + tube.width) {
-      if (bird.y > tube.y && bird.y < tube.y + tube.height) {
-        reset();
-        return;
-      }
+  // Tubes
+  const tubeTransform = Math.round(
+    delta * ((GAME_SPEED * app.screen.width) / 360 + 0.5)
+  );
+
+  lowerTubes.forEach((tube, index) => {
+    if (
+      collisionCheck({
+        x1: bird.x,
+        x2: tube.x,
+        width: tube.width,
+        y1: bird.y,
+        y2: tube.y,
+        height: tube.height,
+      }) ||
+      collisionCheck({
+        x1: bird.x,
+        x2: upperTubes[index].x,
+        width: upperTubes[index].width,
+        y1: bird.y,
+        y2: upperTubes[index].y,
+        height: upperTubes[index].height,
+      })
+    ) {
+      reset();
+      return;
     }
 
-    // move tube along
-    tube.x -= delta * ((GAME_SPEED * app.screen.width) / 360 + 0.5);
+    tube.x -= tubeTransform;
+    upperTubes[index].x -= tubeTransform;
   });
 
-  // check if bird collides with any lower tube
-  lowerTubes.forEach((tube) => {
-    if (bird.x > tube.x && bird.x < tube.x + tube.width) {
-      if (bird.y > tube.y && bird.y < tube.y + tube.height) {
-        reset();
-        return;
-      }
-    }
-
-    // move tube along
-    tube.x -= delta * ((GAME_SPEED * app.screen.width) / 360 + 0.5);
-  });
-
-  // check if tube has exited left screen
   if (lowerTubes.length && lowerTubes[0].x < -lowerTubes[0].width) {
     app.stage.removeChild(upperTubes[0]);
     app.stage.removeChild(lowerTubes[0]);
     upperTubes.shift();
     lowerTubes.shift();
-    addTube();
+    addTubes();
   }
 
-  // score
+  // Score
   time += delta;
   score.text = `${Math.floor(time / 60)}s`;
 
-  // background
-  background.tilePosition.x -= delta * (GAME_SPEED / 12);
-  ground.tilePosition.x -= delta * GAME_SPEED;
+  // Background
+  background.tilePosition.x -= Math.round(delta * (GAME_SPEED / 12));
+  ground.tilePosition.x -= Math.round(delta * GAME_SPEED);
 };
 
 // Events
